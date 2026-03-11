@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>RE: Idle Survivor - 1999 Edition</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">RESIDENT EVIL <span class="red">IDLE</span></div>
+        <ul>
+            <li>HOME</li> <li>JOGAR</li> <li>LOJA</li> <li>SOBRE</li>
+        </ul>
+    </nav>
+
+    <div class="main-container">
+        <aside class="sidebar left">
+            <div class="ad-box">AD: Cyber-Net Shop <br> Modems 56kbps!</div>
+            <div class="hud-buttons">
+            <button class="btn-report" onclick="toggleReport()">📊 RELATÓRIO FINAL</button>
+            </div>
+            <div id="ranking-screen" style="display: none;">
+    <div class="report-header">UMBRELLA CORP.<br>FINAL REPORT</div>
+    <div class="stat-line"><span>SUBJECT:</span> <span id="stat-nick">---</span></div>
+    <div class="stat-line"><span>CURRENT WAVE:</span> <span id="stat-wave">0</span></div>
+    <div class="stat-line"><span>TOTAL KILLS:</span> <span id="stat-kills">0</span></div>
+    <div class="stat-line"><span>BEST WAVE:</span> <span id="stat-best">0</span></div>
+    <hr>
+    <div style="text-align: center; font-size: 10px; color: #aaa; margin-bottom: 10px;">TROPHY COLLECTION</div>
+    <div id="trophy-gallery" class="trophy-grid">
+        </div>
+    <div style="text-align: center; font-size: 10px; color: #aaa;">PERFORMANCE EVALUATION</div>
+    <div id="player-rank">S</div>
+    <button class="close-report" onclick="toggleReport()">FECHAR ARQUIVO</button>
+            </div>
+        </aside>
+
+        <main class="game-area">
+            <div id="wave-announcement">AREA CLEAR</div>
+            <div id="login-screen" class="screen">
+                <h1 class="glitch">IDENTIFIQUE-SE</h1>
+                <p>DIGITE SEU NICKNAME PARA INICIAR A MISSÃO</p>
+                <input type="text" id="nickname-input" placeholder="NICKNAME...">
+                <br>
+                <button onclick="startGame()">INICIAR JOGO</button>
+            </div>
+
+            <div id="game-screen" class="screen hidden">
+                <div class="stats-bar">
+                    <img id="display-emblem" src="" class="pixel-art hidden" title="Sua Patente">
+                    👤 <span id="display-name">---</span> | 💰 GOLD: <span id="gold">0</span> | 🧬 WAVE: <span id="wave">1</span>
+                </div>
+                
+                <div class="arena">
+                    <div id="heroes-side">
+                        <div class="hero-unit">👮<br><small>S.T.A.R.S</small></div>
+                    </div>
+                    <div id="monster-side" onclick="dealClickDamage(event)">
+                        <div id="monster-sprite">🧟</div>
+                        <h3 id="monster-name">ZOMBIE</h3>
+                    </div>
+                </div>
+<div class="skill-container">
+    <div class="grenade-slot" onclick="useSpecialSkill()" style="--charge: 0;">
+    <span class="grenade-icon">💣</span>
+    <span class="grenade-tip">PRESS SPACE</span>
+</div>
+
+<div id="explosion-effect" class="hidden"></div>
+                <div class="monster-hp-container">
+                    <div id="hp-fill"></div>
+                </div>
+                <div class="xp-container">
+                    <div id="xp-fill"></div>
+                </div>
+                <p id="game-log">Aguardando contato com o inimigo...</p>
+            </div>
+        </main>
+
+        <aside class="sidebar right">
+            <div class="ad-box">TOP RANKING <br> 1. Jill V. <br> 2. Chris R.</div>
+            <div class="shop-container">
+            <div class="shop-header">🛒 SUPRIMENTOS DA UMBRELLA (LOJA)</div>
+            <div id="hero-shop-list" class="shop-list">
+        </div>
+        </div>
+        </aside>
+    </div>
+    <footer>SURVIVAL HORROR IDLE PROJECT © 1999-2000</footer>
+    <script src="data.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,738 @@
+:root {
+    --bg-color: #080808;
+    --re-red: #990000;
+    --text-color: #d1d1d1;
+    --border: 3px double #444;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Courier New', Courier, monospace;
+    margin: 0; padding: 0;
+}
+
+.red { color: var(--re-red); font-weight: bold; }
+
+/* Layout Geral */
+.navbar {
+    background: #111;
+    border-bottom: var(--border);
+    padding: 10px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.navbar ul { display: flex; list-style: none; gap: 20px; }
+
+.main-container {
+    display: flex;
+    height: 80vh;
+}
+
+.sidebar {
+    width: 200px;
+    background: #050505;
+    border: var(--border);
+    padding: 10px;
+}
+
+.game-area {
+    flex: 1;
+    background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
+    border-top: var(--border);
+    position: relative;
+    display: flex; justify-content: center; align-items: center;
+}
+
+/* Telas e Arena */
+.screen { text-align: center; width: 100%; }
+.hidden { display: none !important; }
+
+.arena {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 200px;
+    margin: 20px 0;
+}
+
+#monster-sprite { font-size: 80px; cursor: crosshair; transition: transform 0.1s; }
+#monster-sprite:active { transform: scale(0.9); }
+
+/* Barras */
+.monster-hp-container, .xp-container {
+    width: 80%; height: 20px;
+    background: #222; border: 1px solid #555;
+    margin: 10px auto; overflow: hidden;
+}
+#hp-fill { width: 100%; height: 100%; background: var(--re-red); transition: width 0.1s; }
+#xp-fill { width: 0%; height: 100%; background: #006600; transition: width 0.3s; }
+
+input { background: #000; border: 1px solid var(--re-red); color: #fff; padding: 10px; }
+button { background: var(--re-red); border: none; color: white; padding: 10px 20px; cursor: pointer; }
+
+/* Container da Loja */
+.shop-container {
+    background: #111;
+    border: 2px solid #444;
+    margin-top: 20px;
+    width: 90%;
+}
+.shop-header { background: #333; padding: 5px; font-weight: bold; color: var(--re-red); }
+
+.shop-list {
+    display: flex;
+    flex-direction: column;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.shop-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #222;
+}
+
+.shop-item:hover { background: #1a0000; }
+
+.shop-item button {
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+/* Container dos Heróis */
+#heroes-side {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px; /* Aumentei um pouco o espaço entre eles */
+    justify-content: flex-start;
+    width: 75%; /* Dei um pouco mais de espaço na largura */
+}
+
+.hero-unit {
+    position: relative !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end; 
+    width: 90px;  /* Largura do box */
+    height: 120px; /* Aumentei a altura para caber o herói maior */
+    margin: 5px;
+}
+
+.hero-lvl-badge {
+    position: absolute !important;
+    top: auto !important;
+    /* CORREÇÃO: Valor baixo para ficar nos pés (entre a bota e o nome) */
+    bottom: 140px !important; 
+    right: 5px !important;
+    
+    display: inline-block !important;
+    height: 16px !important;
+    min-width: 24px !important;
+    line-height: 14px !important;
+    
+    background-color: #8b0000 !important;
+    color: #ffffff !important;
+    font-size: 10px !important;
+    font-family: 'Courier New', monospace;
+    text-align: center;
+    font-weight: bold;
+    padding: 1px 3px !important;
+    border: 1px solid #ffffff !important;
+    box-shadow: 2px 2px 0px #000;
+    z-index: 100;
+    white-space: nowrap;
+}
+
+/* A IMAGEM DO HERÓI - Aumentada e Nítida */
+.hero-img {
+    width: 150px !important;  /* Forçando os 80px */
+    height: 150px !important;
+    object-fit: contain;
+    margin-bottom: 2px;
+}
+
+/* Removi ou comentei a classe de 500px para não dar conflito */
+/* .hero-sprite-img { width: 80px; } */
+
+/* Animação do Monstro */
+.monster-hit-anim {
+    animation: shake 0.15s ease-in-out;
+    filter: brightness(2) sepia(1) hue-rotate(-50deg);
+}
+
+@keyframes shake {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(5px, -5px); }
+    50% { transform: translate(-5px, 5px); }
+    75% { transform: translate(5px, 5px); }
+    100% { transform: translate(0, 0); }
+}
+
+/* Animação do Herói atacando */
+.hero-attack-anim {
+    animation: lunge 0.2s ease-out;
+}
+
+@keyframes lunge {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(15px); } /* Pequeno avanço em direção ao monstro */
+    100% { transform: translateX(0); }
+}
+
+/* Números de Dano Flutuantes */
+.damage-popup {
+    position: absolute;
+    color: #ff0000;
+    font-weight: bold;
+    font-size: 20px;
+    pointer-events: none;
+    text-shadow: 2px 2px #000;
+    animation: floatUp 0.8s ease-out forwards;
+    z-index: 100;
+}
+
+@keyframes floatUp {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-50px); opacity: 0; }
+}
+
+/* SELO HEROI */
+
+.hero-unit {
+    position: relative;
+    text-align: center;
+    width: 80px;
+    margin-bottom: 15px;
+}
+
+.hero-lvl-badge {
+    position: absolute;
+    top: -5px;
+    right: 5px;
+    background: var(--re-red);
+    color: white;
+    font-size: 10px;
+    padding: 2px 5px;
+    border: 1px solid white;
+    border-radius: 3px;
+    z-index: 10;
+}
+
+.hero-img {
+    width: 50px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Container do Jogo com transição suave de fundo */
+.game-area {
+    background-size: cover;
+    background-position: center;
+    transition: background-image 1s ease-in-out, filter 0.5s;
+}
+
+/* Overlay de Alerta de Wave */
+#wave-announcement {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    background: rgba(139, 0, 0, 0.8);
+    color: white;
+    padding: 20px 0;
+    font-size: 30px;
+    font-weight: bold;
+    text-shadow: 2px 2px #000;
+    z-index: 200;
+    pointer-events: none;
+    display: none; /* Escondido por padrão */
+    letter-spacing: 5px;
+    border-top: 4px solid #fff;
+    border-bottom: 4px solid #fff;
+}
+
+/* Classe de flash vermelho para adrenalina */
+.danger-flash {
+    animation: flashRed 0.5s;
+}
+
+@keyframes flashRed {
+    0% { filter: brightness(1); }
+    50% { filter: brightness(0.5) sepia(1) hue-rotate(-50deg); }
+    100% { filter: brightness(1); }
+}
+
+
+/* Drops */
+
+.loot-drop {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    z-index: 150;
+    filter: drop-shadow(0 0 5px gold);
+    animation: itemBounce 0.6s ease-out forwards, glow 1s infinite alternate;
+}
+
+@keyframes itemBounce {
+    0% { transform: translateY(0) scale(0.5); opacity: 0; }
+    50% { transform: translateY(-50px) scale(1.2); opacity: 1; }
+    100% { transform: translateY(20px) scale(1); } /* Ele cai um pouco no 'chão' da arena */
+}
+
+@keyframes glow {
+    from { filter: drop-shadow(0 0 2px gold); }
+    to { filter: drop-shadow(0 0 10px yellow); }
+}
+
+/* Container da Skill */
+.skill-container {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.skill-bar-bg {
+    width: 200px;
+    height: 10px;
+    background: #222;
+    border: 1px solid #444;
+    margin: 5px auto;
+}
+
+#skill-fill {
+    width: 0%;
+    height: 100%;
+    background: #ffcc00; /* Cor de carga */
+    transition: width 0.2s;
+}
+
+#btn-skill {
+    background: #333;
+    color: #666;
+    border: 2px outset #555;
+    padding: 10px 20px;
+    font-weight: bold;
+    cursor: not-allowed;
+}
+
+/* Quando a Skill está pronta */
+#btn-skill.ready {
+    background: #8b0000;
+    color: white;
+    border: 2px outset #ff0000;
+    cursor: pointer;
+    animation: pulseGlow 1s infinite alternate;
+}
+
+@keyframes pulseGlow {
+    from { box-shadow: 0 0 5px #8b0000; }
+    to { box-shadow: 0 0 20px #ff0000; }
+}
+
+/* Efeito de Explosão na Tela */
+#explosion-effect {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, #fff 0%, #ffcc00 30%, #ff6600 60%, transparent 100%);
+    border-radius: 50%;
+    z-index: 500;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.explosion-anim {
+    animation: explode 0.5s ease-out forwards;
+}
+
+@keyframes explode {
+    0% { transform: translate(-50%, -50%) scale(0.1); opacity: 1; }
+    50% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.8; filter: brightness(2); }
+    100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+}
+
+/* Container para as manchas não fugirem da área do jogo */
+.game-area {
+    position: relative;
+    overflow: hidden;
+}
+
+.blood-splat {
+    position: absolute;
+    pointer-events: none; /* Essencial: o clique passa através do sangue */
+    background: #8a0303; /* Vermelho sangue escuro */
+    border-radius: 50%;
+    z-index: 1000;
+    filter: blur(1px);
+    opacity: 0.8;
+    box-shadow: 0 0 5px #4a0000;
+    animation: splatAnim 0.8s ease-out forwards;
+}
+
+@keyframes splatAnim {
+    0% {
+        transform: scale(0) translate(0, 0);
+        opacity: 1;
+    }
+    30% {
+        transform: scale(1.5) translate(var(--tx), var(--ty));
+        opacity: 0.9;
+    }
+    100% {
+        transform: scale(1.2) translate(var(--tx), calc(var(--ty) + 40px)); /* Escorre para baixo */
+        opacity: 0;
+    }
+}
+
+/* Animação de Respiração (Idle) */
+.monster-idle {
+    animation: breathing 2s ease-in-out infinite;
+}
+
+@keyframes breathing {
+    0%, 100% { transform: scale(1) translateY(0); }
+    50% { transform: scale(1.02) translateY(-5px); }
+}
+
+/* Animação de Avanço (Zumbis que mancam) */
+.monster-walk {
+    animation: zombieWalk 4s ease-in-out infinite;
+}
+
+@keyframes zombieWalk {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(15px); }
+}
+
+/* Efeito de Flash para Bosses (Aura de perigo) */
+.boss-glow {
+    filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.7)) !important;
+}
+
+.muzzle-flash {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: yellow;
+    border-radius: 50%;
+    box-shadow: 0 0 15px orange;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 20;
+}
+
+.flash-active {
+    animation: quickFlash 0.1s ease-out;
+}
+
+@keyframes quickFlash {
+    0% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(2); }
+}
+/* Container da Granada no HUD */
+.grenade-slot {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 60px;
+    height: 60px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #333;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+/* O "Anel" de progresso circular */
+.grenade-slot::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 4px solid transparent;
+    border-top-color: #ffcc00; /* Cor da carga */
+    transform: rotate(calc(var(--charge) * 1deg));
+    transition: transform 0.2s linear;
+}
+
+.grenade-slot.ready {
+    border-color: #ff0000;
+    box-shadow: 0 0 15px #ff0000;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.1); }
+}
+
+.grenade-icon {
+    font-size: 24px;
+    filter: grayscale(1);
+}
+
+.grenade-slot.ready .grenade-icon {
+    filter: grayscale(0);
+}
+
+/* Texto de "PRESS SPACE" intuitivo */
+.grenade-tip {
+    position: absolute;
+    bottom: -20px;
+    font-size: 10px;
+    color: #ff0000;
+    white-space: nowrap;
+    display: none;
+}
+
+.grenade-slot.ready .grenade-tip { display: block; }
+
+
+/* Estilo habilidades */
+
+.ability-tag {
+    color: #ffcc00; /* Destaque para a habilidade */
+    font-size: 11px;
+    margin: 2px 0;
+    font-style: italic;
+    border-left: 2px solid #ffcc00;
+    padding-left: 5px;
+}
+
+.shop-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    margin-bottom: 8px;
+    padding: 10px;
+}
+
+/* Container do Relatório */
+#ranking-screen {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 350px;
+    background: #050505;
+    border: 3px double #8b0000;
+    padding: 20px;
+    color: #00ff00; /* Verde Matrix/Terminal */
+    font-family: 'Courier New', Courier, monospace;
+    z-index: 2000;
+    box-shadow: 0 0 20px rgba(139, 0, 0, 0.5);
+    display: none; /* Escondido por padrão */
+}
+
+.report-header {
+    border-bottom: 2px solid #8b0000;
+    margin-bottom: 15px;
+    text-align: center;
+    color: #fff;
+    letter-spacing: 2px;
+}
+
+.stat-line {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+#player-rank {
+    font-size: 48px;
+    text-align: center;
+    color: #ff0000;
+    font-weight: bold;
+    text-shadow: 0 0 10px #ff0000;
+    margin-top: 10px;
+}
+
+.close-report {
+    display: block;
+    width: 100%;
+    background: #222;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 5px;
+    margin-top: 15px;
+    cursor: pointer;
+}
+
+/*Emblemas*/
+
+.player-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#display-emblem {
+    width: 32px;
+    height: 32px;
+    image-rendering: pixelated;
+}
+
+#btn-prestige {
+    background: linear-gradient(to bottom, #003366, #000);
+    color: gold;
+    border: 2px solid gold;
+    padding: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    animation: glowGold 1.5s infinite alternate;
+}
+
+@keyframes glowGold {
+    from { box-shadow: 0 0 5px gold; }
+    to { box-shadow: 0 0 20px gold; }
+}
+
+/* Container da Grade - Agora com 6 colunas para caber mais */
+.trophy-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr); 
+    gap: 8px;
+    margin: 10px 0;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid #222;
+    justify-items: center; /* Centraliza o ícone no espaço */
+}
+
+/* O Slot (Onde o ícone mora) */
+.trophy-slot {
+    width: 28px;  /* Diminuído aqui */
+    height: 28px; /* Diminuído aqui */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* A Imagem do Troféu */
+.trophy-img {
+    max-width: 100%;
+    max-height: 100%;
+    image-rendering: pixelated;
+    transition: transform 0.2s;
+}
+
+/* Efeito ao passar o mouse (Zoom leve) */
+.trophy-img:hover {
+    transform: scale(1.2);
+    z-index: 10;
+}
+
+/* Filtro para bloqueados (mais escuro ainda para dar contraste) */
+.trophy-locked {
+    filter: grayscale(1) brightness(0.1);
+    opacity: 0.2;
+}
+
+.trophy-unlocked {
+    filter: drop-shadow(0 0 3px #ff0000); /* Brilho vermelho Umbrella */
+    opacity: 1;
+}
+
+/* Aura Azul para Veteranos (Lv. 50 até 99) */
+.hero-veteran img {
+    filter: drop-shadow(0 0 8px #00ccff) !important;
+    animation: pulseBlue 2s infinite alternate;
+}
+
+@keyframes pulseBlue {
+    from { filter: drop-shadow(0 0 4px #00ccff); }
+    to { filter: drop-shadow(0 0 12px #00ccff); }
+}
+
+/* Aura Dourada para Lendas (Lv. 100+) */
+.hero-legend img {
+    filter: drop-shadow(0 0 10px #ffcc00) !important;
+    animation: pulseGold 1.5s infinite alternate;
+}
+
+@keyframes pulseGold {
+    from { filter: drop-shadow(0 0 5px #ffcc00); }
+    to { filter: drop-shadow(0 0 20px #ffcc00); }
+}
+
+
+/* Container das Barras */
+.bars-container {
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid #333;
+    border-radius: 4px;
+    box-shadow: inset 0 0 10px #000;
+}
+
+/* Estilo Base da Barra (Fundo) */
+.bar-bg {
+    width: 100%;
+    height: 12px;
+    background: #111;
+    border: 1px solid #444;
+    margin: 5px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+/* BARRA DE VIDA (Estilo EKG / Corredor) */
+#hp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #8b0000 0%, #ff0000 100%);
+    box-shadow: 0 0 10px #ff0000;
+    transition: width 0.3s ease-out;
+}
+
+/* BARRA DE XP (Estilo Tático S.T.A.R.S) */
+#xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #003366 0%, #00aaff 100%);
+    box-shadow: 0 0 10px #00aaff;
+    transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Efeito de "Scanline" nas barras para parecer monitor antigo */
+.bar-bg::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.05), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.05));
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+}
+
+/* Animação de Flash Branco para o Herói */
+.lvl-up-flash img {
+    animation: heroFlash 0.6s ease-out;
+}
+
+@keyframes heroFlash {
+    0% { filter: brightness(1); transform: scale(1); }
+    20% { filter: brightness(5); transform: scale(1.1); } /* Brilho máximo */
+    100% { filter: brightness(1); transform: scale(1); }
+}
+
+/* Animação de "Pulo" para o Badge de Nível */
+.badge-pop {
+    animation: popBadge 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popBadge {
+    0% { transform: scale(0.5); opacity: 0; }
+    50% { transform: scale(1.5); } /* Ele cresce além do tamanho */
+    100% { transform: scale(1); opacity: 1; }
+}
