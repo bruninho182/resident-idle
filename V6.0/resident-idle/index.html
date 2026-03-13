@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RE: Idle Survivor - 1999 Edition</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">
+            <img src="assets/page/logo.png" alt="RE: Idle Survivor Logo" class="game-logo-img">
+        </div>
+        <ul>
+            <li>HOME</li> 
+            <li>MISSÃO</li> 
+            <li class="red">STATUS: ONLINE</li>
+        </ul>
+    </nav>
+
+    <div class="main-container">
+        <aside class="sidebar left">
+            <div class="status-header">
+                <small>AGENTE ATIVO:</small><br>
+                <span id="display-name" class="red">---</span>
+            </div>
+
+            <div class="inventory-section">
+                <div class="side-header">MALETA DE ITENS</div>
+                <div id="inventory-grid" class="briefcase-grid">
+                    <div class="item-slot"></div><div class="item-slot"></div><div class="item-slot"></div>
+                    <div class="item-slot"></div><div class="item-slot"></div><div class="item-slot"></div>
+                    <div class="item-slot"></div><div class="item-slot"></div><div class="item-slot"></div>
+                </div>
+            </div>
+
+            <div class="achievements-section">
+                <div class="side-header">CONQUISTAS</div>
+                <div id="trophy-gallery" class="medal-grid"></div>
+            </div>
+
+            <div class="synergy-section">
+                <div class="side-header">SINERGIAS ATIVAS</div>
+                <div id="active-synergy-list"></div>
+            </div>
+        </aside>
+
+        <main class="game-area">
+            <div id="wave-announcement">AREA CLEAR</div>
+            
+            <div id="login-screen" class="screen">
+                <h1 class="glitch">IDENTIFIQUE-SE</h1>
+                <input type="text" id="nickname-input" placeholder="NICKNAME...">
+                <button onclick="startGame()">INICIAR MISSÃO</button>
+            </div>
+
+            <div id="game-screen" class="screen hidden">
+                <div class="stats-bar">
+                    💰 GOLD: <span id="gold" class="red">0</span> | 🧬 WAVE: <span id="wave">1</span>
+                </div>
+                
+                <div class="stat-item">
+                    <span>PODER DE FOGO:</span>
+                    <span id="display-dps" style="color: #ff0000;">0</span>
+                </div>
+
+                <div class="arena">
+                    <div id="heroes-side"></div>
+                    
+                    <div id="monster-container" style="position: relative;">
+                        <div id="monster-side" onclick="dealClickDamage(event)">
+                            <div id="monster-sprite">
+                                <img id="current-monster-img" src="" alt="">
+                            </div>
+                            <h3 id="monster-name">TARGET</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-tatico" onclick="openBarracks()">📋 GERENCIAR ESQUADRÃO</button>
+
+                <div id="barracks-modal" class="screen hidden">
+                    <div class="barracks-container">
+                        <div class="side-header">BANCO DE DADOS DE PESSOAL</div>
+                        <div class="barracks-info">Selecione até 10 agentes recrutados para o campo.</div>
+                        <div class="barracks-controls">
+                            <button class="btn-clear" onclick="clearSquad()">⚠️ DESMOBILIZAR TODOS</button>
+                        </div>
+                        <div id="all-heroes-list" class="barracks-grid"></div>
+                        <button class="btn-red" onclick="closeBarracks()">CONFIRMAR ESQUADRÃO</button>
+                    </div>
+                </div>
+
+                <div class="bars-container">
+                    <small style="color: #666;">MONITOR DE VITALIDADE DO ALVO</small>
+                    <div class="bar-bg">
+                        <div id="hp-text">0 / 0</div>
+                        <div id="hp-fill" class="hp-fine"></div>
+                    </div>
+                    
+                    <small style="color: #666;">PROGRESSO DE TREINAMENTO (XP)</small>
+                    <div class="bar-bg">
+                        <div id="xp-text">XP: 0 / 50</div>
+                        <div id="xp-fill"></div>
+                    </div>
+                    
+                
+                </div>
+
+                <div class="grenade-slot" onclick="useSpecialSkill(event)">
+                    <span class="grenade-icon">💣</span>
+                    <span class="grenade-tip">PRESS SPACE</span>
+                </div>
+                <div id="explosion-effect" class="hidden"></div>
+            </div>
+        </main>
+
+        <aside class="sidebar right">
+            <div class="shop-container">
+                <div class="shop-tabs">
+                    <button class="tab-btn active" onclick="switchShop('heroes')">AGENTES</button>
+                    <button class="tab-btn" onclick="switchShop('items')">SUPRIMENTOS</button>
+                </div>
+
+                <div id="hero-shop-list" class="shop-modern-list"></div>
+                <div id="item-shop-list" class="shop-modern-list hidden"></div>
+            </div>
+        </aside>
+    </div>
+
+    <footer>SURVIVAL HORROR IDLE PROJECT © 1999-2026</footer>
+
+    <script src="data.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

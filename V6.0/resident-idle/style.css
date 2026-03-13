@@ -1,0 +1,853 @@
+/* ==========================================================================
+   1. VARIÁVEIS E CONFIGURAÇÃO BASE
+   ========================================================================== */
+:root {
+    --bg-color: #050505;
+    --re-red: #990000;
+    --re-blue: #00aaff;
+    --re-gold: #ffcc00;
+    --text-color: #d1d1d1;
+    --border-double: 3px double #444;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Courier New', Courier, monospace;
+    margin: 0; padding: 0;
+    overflow-x: hidden;
+}
+
+/* Efeito CRT/Scanline */
+body::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+    z-index: 9999;
+    background-size: 100% 3px, 3px 100%;
+    pointer-events: none;
+}
+
+.red { color: var(--re-red); font-weight: bold; }
+.hidden { display: none !important; }
+
+/* ==========================================================================
+   2. ESTRUTURA PRINCIPAL (SIDEBARS)
+   ========================================================================== */
+.navbar {
+    background: #111;
+    border-bottom: var(--border-double);
+    padding: 10px 20px;
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+.main-container { display: flex; min-height: 85vh; }
+
+.sidebar { width: 220px; background: #080808; flex-shrink: 0; }
+
+/* --- SIDEBAR ESQUERDA (HUB UNIFICADO) --- */
+.sidebar.left {
+    display: flex;
+    flex-direction: column;
+    border-right: var(--border-double);
+}
+
+.inventory-section, .achievements-section {
+    padding: 15px;
+    flex: 1;
+}
+
+.inventory-section { border-bottom: 2px solid #222; }
+
+.side-header {
+    background: linear-gradient(90deg, #8b0000, transparent);
+    color: #fff;
+    padding: 5px 10px;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    border-left: 3px solid #ff0000;
+    margin-bottom: 15px;
+}
+
+/* MALETA (Briefcase) */
+.briefcase-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    background: #111;
+    padding: 10px;
+    border: 1px solid #333;
+}
+
+/* --- Visual do Ícone dentro da Maleta ( Briefcase ) --- */
+.briefcase-grid .item-slot {
+    /* Garante que o container pai esteja centralizado */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* Impede que qualquer coisa vaze */
+    position: relative;
+}
+
+.item-icon {
+    /* ESSENCIAL: Faz com que o ícone nunca saia do box de 48px */
+    max-width: 100%;
+    max-height: 100%;
+    
+    /* Mantém a proporção e a qualidade do Pixel Art */
+    object-fit: contain; 
+    image-rendering: pixelated;
+    
+    /* Brilho neon leve estilo RE ao redor do item (opcional) */
+    filter: drop-shadow(0 0 3px rgba(0, 255, 0, 0.5));
+    transition: filter 0.2s;
+    cursor: pointer;
+}
+
+/* Efeito de brilho mais forte ao passar o mouse */
+.item-icon:hover {
+    filter: drop-shadow(0 0 8px rgba(0, 255, 0, 0.8));
+}
+
+.item-slot {
+    width: 48px; height: 48px;
+    background: #050505;
+    border: 1px solid #222;
+    box-shadow: inset 0 0 8px #000;
+    display: flex; align-items: center; justify-content: center;
+}
+
+/* MEDALHAS (Persistent Grid) */
+.medal-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding: 10px;
+}
+
+.trophy-img { width: 32px; height: 32px; image-rendering: pixelated; }
+.trophy-locked { filter: grayscale(1) brightness(0.2); opacity: 0.5; }
+
+/* --- SIDEBAR DIREITA (LOJA MODERNA) --- */
+.sidebar.right { border-left: var(--border-double); }
+
+.shop-modern-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 15px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.shop-card {
+    background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+    border: 1px solid #333;
+    border-left: 4px solid #444;
+    padding: 12px;
+    transition: all 0.3s;
+}
+
+.shop-card:hover {
+    border-left-color: #ff0000;
+    background: #150000;
+    transform: translateX(5px);
+}
+
+.shop-card-header {
+    display: flex; justify-content: space-between;
+    font-weight: bold; font-size: 12px; margin-bottom: 5px;
+}
+
+.recruit-btn {
+    width: 100%; margin-top: 10px; padding: 8px;
+    background: #8b0000; color: white; border: none;
+    font-family: 'Courier New', monospace; font-weight: bold;
+    cursor: pointer; text-transform: uppercase;
+    clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
+}
+
+.recruit-btn:disabled { background: #222; color: #555; clip-path: none; }
+
+/* ==========================================================================
+   3. ARENA TÁTICA E HERÓIS (5x2)
+   ========================================================================== */
+.game-area {
+    flex: 1;
+    background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
+    position: relative;
+    display: flex; flex-direction: column; padding: 20px;
+}
+
+.arena {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 20px; width: 100%; margin: 10px auto; align-items: center;
+}
+
+#heroes-side {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* 5 Colunas fixas */
+    grid-template-rows: repeat(2, 1fr);    /* 2 Linhas fixas */
+    gap: 15px; /* Espaço entre os cards */
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid #222;
+    box-shadow: inset 0 0 20px #000;
+    overflow: visible !important; /* ESSENCIAL para a bio não sumir ao sair da grade */
+}
+
+.hero-img {
+    width: 125px !important; /* Sprites MAIORES: Aumentado de 72px para 80px */
+    height: 125px !important;
+    image-rendering: pixelated;
+    object-fit: contain; /* Nunca deforma */
+    transition: transform 0.2s;
+    margin-top: 5px; /* Espaço do topo */
+}
+
+.hero-unit {
+    position: relative; /* Âncora para a Bio/Tooltip */
+    background: linear-gradient(180deg, #1a1a1a 0%, #050505 100%);
+    border: 2px solid #333;
+    padding: 10px 5px;
+    height: 155px !important; /* Altura aumentada para personagens maiores e sem nome */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+    transition: all 0.3s;
+}
+
+.hero-unit:hover {
+    border-color: var(--re-red);
+    background: #150000;
+}
+
+.hero-unit small {
+    display: none !important; /* Esconde o elemento <small> */
+}
+
+.hero-lvl-tag {
+    width: 100%;
+    background: var(--re-red);
+    color: #fff;
+    font-size: 11px;
+    font-weight: bold;
+    text-align: center;
+    padding: 2px 0;
+    border-top: 1px solid #fff;
+    letter-spacing: 1px;
+    margin-top: auto; /* Força para a base */
+}
+
+/* ==========================================================================
+   4. TARGET ZONE (MONSTRO)
+   ========================================================================== */
+#monster-side {
+    background: rgba(139, 0, 0, 0.05);
+    border: 2px solid #444;
+    padding: 20px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    position: relative; height: 350px; cursor: crosshair;
+}
+
+#monster-side::before {
+    content: ''; position: absolute; top: 15px; left: 15px; width: 30px; height: 30px;
+    border-top: 3px solid var(--re-red); border-left: 3px solid var(--re-red);
+}
+
+#monster-side::after {
+    content: ''; position: absolute; bottom: 15px; right: 15px; width: 30px; height: 30px;
+    border-bottom: 3px solid var(--re-red); border-right: 3px solid var(--re-red);
+}
+
+#monster-sprite img { max-width: 200px !important; filter: drop-shadow(0 0 15px #000); }
+
+/* ==========================================================================
+   5. HUD E EFEITOS
+   ========================================================================== */
+.bars-container {
+    width: 95%; max-width: 700px; padding: 15px;
+    background: #000; border: 3px double #444; margin: 15px auto;
+}
+
+.bar-bg {
+    width: 100%; height: 22px; background: #0a0a0a; border: 1px solid #444;
+    margin: 10px 0; position: relative; overflow: hidden;
+}
+
+#hp-text, #xp-text {
+    position: absolute; width: 100%; text-align: center;
+    line-height: 22px; font-size: 12px; font-weight: bold; color: #fff; z-index: 10;
+}
+
+.hp-fine { background: linear-gradient(90deg, #004400, #00ff00) !important; box-shadow: 0 0 10px #00ff00; }
+.hp-caution { background: linear-gradient(90deg, #664400, #ffcc00) !important; box-shadow: 0 0 10px #ffcc00; }
+.hp-danger { background: linear-gradient(90deg, #550000, #ff0000) !important; box-shadow: 0 0 10px #ff0000; }
+
+#hp-fill, #xp-fill {
+    height: 100%;
+    width: 0%; /* Começa em zero e o JS aumenta */
+    transition: width 0.3s ease;
+}
+
+.damage-popup {
+    position: absolute; pointer-events: none;
+    pointer-events: none;
+    font-size: 26px; font-weight: 900; color: #ff0000;
+    text-shadow: 2px 2px #000; z-index: 2000;
+    animation: floatUpDamage 0.7s ease-out forwards;
+}
+
+@keyframes floatUpDamage {
+    0% { transform: translateY(0) scale(0.8); opacity: 1; }
+    100% { transform: translateY(-80px) scale(1.3); opacity: 0; }
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+/* Tooltip */
+.hero-tooltip {
+    position: absolute;
+    bottom: 110%; /* Sempre acima do herói */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    background: rgba(5, 5, 5, 0.98);
+    border: 1px solid var(--re-red);
+    padding: 12px;
+    z-index: 9999;
+    display: none; /* Só aparece no hover */
+    pointer-events: none;
+    box-shadow: 0 0 20px rgba(139, 0, 0, 0.6);
+    text-align: left;
+}
+
+.hero-unit:hover .hero-tooltip { display: block; animation: fadeIn 0.2s ease-out; }
+
+/* Responsividade */
+@media (max-width: 1200px) {
+    .main-container { flex-direction: column; }
+    .sidebar { width: 100%; border: none; border-bottom: var(--border-double); }
+    .sidebar.left { flex-direction: row; }
+    .arena { grid-template-columns: 1fr; }
+}
+
+/* --- BOTÃO DA GRANADA (ESTRATÉGICO) --- */
+/* --- BOTÃO DA GRANADA DINÂMICO --- */
+.grenade-slot {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 70px;
+    height: 70px;
+    background: conic-gradient(var(--re-red) var(--charge), #222 0deg);
+    border: 3px solid #444;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    transition: all 0.3s;
+    box-shadow: 0 0 10px #000;
+}
+
+.grenade-icon {
+    font-size: 24px;
+    z-index: 2;
+}
+
+.grenade-tip {
+    font-size: 8px;
+    font-weight: bold;
+    color: #fff;
+    z-index: 2;
+}
+
+/* Efeito de "Pronto para Uso" */
+.grenade-slot.ready {
+    border-color: #fff;
+    box-shadow: 0 0 20px #ff0000, inset 0 0 10px #ff0000;
+    animation: pulseReady 1s infinite;
+    transform: scale(1.1);
+}
+
+.grenade-slot.ready .grenade-icon {
+    filter: drop-shadow(0 0 5px #fff);
+}
+
+@keyframes pulseReady {
+    0% { box-shadow: 0 0 10px #ff0000; }
+    50% { box-shadow: 0 0 25px #ff0000, 0 0 10px #fff; }
+    100% { box-shadow: 0 0 10px #ff0000; }
+}
+
+/* Overlay interno para o ícone não ser afetado pelo degradê do fundo */
+.grenade-slot::after {
+    content: "";
+    position: absolute;
+    width: 80%;
+    height: 80%;
+    background: #111;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+/* BARRA ESQUERDA UNIFICADA */
+.sidebar.left {
+    display: flex;
+    flex-direction: column;
+    padding: 0 !important;
+}
+
+.status-header {
+    padding: 15px;
+    background: #111;
+    border-bottom: 2px solid var(--re-red);
+}
+
+.inventory-section, .achievements-section {
+    padding: 15px;
+    flex: 1;
+}
+
+/* MALETA ESTILO RE */
+.briefcase-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    background: #111;
+    padding: 8px;
+    border: 1px solid #333;
+}
+
+.item-slot {
+    width: 50px; height: 50px;
+    background: #050505;
+    border: 1px solid #222;
+    box-shadow: inset 0 0 10px #000;
+}
+
+/* LOJA MODERNA */
+.shop-card {
+    background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+    border: 1px solid #333;
+    border-left: 4px solid #444;
+    padding: 10px;
+    margin-bottom: 10px;
+    transition: 0.3s;
+}
+
+.shop-card:hover {
+    border-left-color: var(--re-red);
+    transform: translateX(5px);
+}
+
+.recruit-btn {
+    width: 100%;
+    background: #8b0000;
+    color: #fff;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
+}
+
+/* Container de Itens na Loja */
+.item-shop-card {
+    background: linear-gradient(135deg, #0d0d0d, #1a1a1a);
+    border: 1px solid #444;
+    padding: 8px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.item-shop-card img {
+    width: 32px;
+    height: 32px;
+    filter: drop-shadow(0 0 5px #00ff00);
+}
+
+.item-buy-btn {
+    background: #222;
+    border: 1px solid #444;
+    color: var(--re-gold);
+    font-size: 10px;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+.item-buy-btn:hover { background: #333; }
+
+.shop-tabs {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 15px;
+    padding: 0 10px;
+}
+
+.tab-btn {
+    flex: 1;
+    background: #111;
+    border: 1px solid #333;
+    color: #666;
+    padding: 8px;
+    font-size: 10px;
+    font-family: 'Courier New', monospace;
+    cursor: pointer;
+}
+
+.tab-btn.active {
+    background: var(--re-red);
+    color: #fff;
+    border-color: #fff;
+    box-shadow: 0 0 10px rgba(139, 0, 0, 0.5);
+}
+
+/* --- EFEITOS DE POTÊNCIA MÁXIMA (Magnum) --- */
+
+/* 1. O Flash Vermelho na Área do Monstro */
+.magnum-flash-anim {
+    animation: targetFlash 0.1s ease-out;
+}
+
+@keyframes targetFlash {
+    0% { background: rgba(255, 0, 0, 0.4); }
+    100% { background: rgba(139, 0, 0, 0.05); } /* Volta para a cor original da zona */
+}
+
+/* 2. O Estremecimento Tático (Screen Shake) */
+.magnum-shake-anim {
+    animation: terminalShake 0.15s ease-in-out;
+}
+
+@keyframes terminalShake {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(6px, -6px); }
+    50% { transform: translate(-6px, 6px); }
+    75% { transform: translate(3px, -3px); }
+    100% { transform: translate(0, 0); }
+}
+
+/* --- EFEITO DE INTERFERÊNCIA ANALÓGICA (GLITCH) --- */
+
+.magnum-glitch-active {
+    position: relative;
+    overflow: hidden;
+}
+
+/* O Ruído Visual (Chuva) */
+.magnum-glitch-active::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: url('https://media.giphy.com/media/oEI9uWUicG57q/giphy.gif'); /* Ruído estático clássico */
+    opacity: 0.1; /* Bem sutil para não atrapalhar o jogo */
+    z-index: 9998;
+    pointer-events: none;
+    mix-blend-mode: screen;
+}
+
+/* Efeito de Tremor de Linhas (Scanlines instáveis) */
+.magnum-glitch-active::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent 0px,
+        rgba(255, 255, 255, 0.05) 1px,
+        transparent 2px
+    );
+    z-index: 9997;
+    pointer-events: none;
+    animation: scanlineMove 0.2s infinite;
+}
+
+@keyframes scanlineMove {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(4px); }
+}
+
+/* Flicker (Piscada de brilho) */
+.magnum-flicker {
+    animation: screenFlicker 0.1s infinite;
+}
+
+@keyframes screenFlicker {
+    0% { filter: brightness(1); }
+    50% { filter: brightness(1.2) contrast(1.1); }
+    100% { filter: brightness(1); }
+}
+
+/* --- Estilização do Novo Logo Gráfico --- */
+.navbar .logo {
+    display: flex;
+    align-items: center;
+    padding: 0; /* Remove paddings antigos de texto */
+}
+
+.game-logo-img {
+    height: 100px; /* Ajuste a altura para caber bem na navbar */
+    width: 270px; /* Mantém a proporção da imagem */   
+    
+    /* Um brilho sutil vermelho atrás (opcional, combina com o clima) */
+    filter: drop-shadow(0 0 5px rgba(139, 0, 0, 0.7));
+    
+    transition: transform 0.3s ease;
+}
+
+/* Efeito ao passar o mouse no logo */
+.game-logo-img:hover {
+    transform: scale(1.05) rotate(-2deg);
+}
+
+#barracks-modal {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%; height: 80%;
+    background: rgba(5, 5, 5, 0.98);
+    border: 2px solid var(--re-red);
+    z-index: 10000;
+    padding: 30px;
+    box-shadow: 0 0 50px #000;
+}
+
+.barracks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* Card do herói nas barracas */
+.barracks-card {
+    border: 1px solid #333;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+    position: relative;
+    opacity: 0.4; /* Bloqueado por padrão */
+}
+
+.barracks-card.owned { opacity: 1; border-color: #555; }
+.barracks-card.in-squad { border-color: var(--re-red); box-shadow: inset 0 0 10px #8b0000; }
+
+.barracks-card img { width: 64px; height: 64px; image-rendering: pixelated; }
+
+/* Badge de "BLOQUEADO" */
+.locked-label {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ff0000;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.synergy-badge {
+    background: rgba(0, 255, 0, 0.1);
+    border: 1px solid #00ff00;
+    color: #00ff00;
+    font-size: 9px;
+    padding: 4px;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Container para os danos não quebrarem o layout */
+#monster-side { position: relative; }
+
+.dmg-popup {
+    position: absolute;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    color: #fff;
+    pointer-events: none;
+    z-index: 1000;
+    animation: floatUp 0.8s ease-out forwards;
+    text-shadow: 2px 2px #000;
+}
+
+/* Estilo Especial para o Crítico */
+.dmg-crit {
+    color: #ffff00; /* Amarelo */
+    font-size: 24px;
+    text-shadow: 0 0 10px #ffaa00, 2px 2px #000;
+    z-index: 1001;
+}
+
+@keyframes floatUp {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-100px) scale(1.2); opacity: 0; }
+}
+
+.shake-anim {
+    animation: shake 0.2s ease-in-out;
+}
+
+@keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    20% { transform: translate(-3px, 0px) rotate(-1deg); }
+    40% { transform: translate(3px, 2px) rotate(1deg); }
+    60% { transform: translate(-1px, -1px) rotate(1deg); }
+    80% { transform: translate(-3px, 1px) rotate(-1deg); }
+    100% { transform: translate(1px, -2px) rotate(0deg); }
+}
+
+/* Botão Principal de Gerenciamento */
+.btn-tatico {
+    background: linear-gradient(135deg, #0f0f0f 0%, #1a0000 100%);
+    color: #ff0000;
+    border: 2px solid #8b0000;
+    padding: 12px 24px;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(139, 0, 0, 0.4);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-tatico:hover {
+    background: #8b0000;
+    color: #fff;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
+    transform: scale(1.05);
+}
+
+/* Efeito de brilho pulsante no texto */
+.btn-tatico::after {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: linear-gradient(transparent, rgba(255,0,0,0.1), transparent);
+    transform: rotate(45deg);
+    animation: scanline 3s infinite linear;
+}
+
+@keyframes scanline {
+    0% { top: -100%; }
+    100% { top: 100%; }
+}
+
+.btn-clear {
+    background: #444;
+    color: #ccc;
+    border: 1px solid #666;
+    padding: 8px 15px;
+    font-size: 10px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.btn-clear:hover {
+    background: #222;
+    color: #ff0000;
+    border-color: #ff0000;
+}
+
+/* Botão de Gerenciamento Estilizado */
+#btn-manage-squad {
+    background: #000;
+    color: #ff0000;
+    border: 2px solid #333;
+    padding: 10px 20px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    position: relative;
+    box-shadow: inset 0 0 5px #ff0000;
+    transition: 0.3s;
+}
+
+#btn-manage-squad:hover {
+    background: #ff0000;
+    color: #fff;
+    box-shadow: 0 0 15px #ff0000;
+}
+
+/* O Botão de Limpar dentro do modal */
+.btn-clear-all {
+    background: #222;
+    color: #888;
+    border: 1px solid #444;
+    font-size: 10px;
+    padding: 5px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.btn-clear-all:hover {
+    color: #ff0000;
+    border-color: #ff0000;
+}
+
+/* Efeito de Explosão */
+.monster-explosion {
+    animation: explode 0.5s ease-out forwards;
+    filter: brightness(2) contrast(2);
+}
+
+@keyframes explode {
+    0% { transform: scale(1); opacity: 1; filter: hue-rotate(0deg) brightness(1); }
+    50% { transform: scale(1.2); opacity: 0.8; filter: hue-rotate(90deg) brightness(5); }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* Container do monstro para o sangue não sair voando pela tela toda */
+#monster-container {
+    position: relative; /* Garante que o sangue fique preso aqui dentro */
+}
+
+/* Base da partícula de sangue (Pixel Art) */
+.blood-particle {
+    position: absolute;
+    background-color: #8b0000 !important; /* Vermelho sangue RE */
+    width: 5px !important;
+    height: 5px !important;
+    z-index: 9999 !important; /* GARANTE que fique na frente de tudo */
+    pointer-events: none;
+    image-rendering: pixelated;
+    box-shadow: 1px 1px 0 #000;
+    animation: blood-splat 0.6s ease-out forwards;
+}
+
+@keyframes blood-splat {
+    0% { transform: translate(0, 0) scale(1.5); opacity: 1; }
+    100% { transform: translate(var(--tx), var(--ty)) scale(0.2); opacity: 0; }
+}
+
+/* NOVA Animação de Morte do Monstro (Substituindo a antiga explosão branca) */
+.monster-death-gore {
+    animation: monster-body-splat 0.5s ease-out forwards;
+    filter: hue-rotate(-10deg) saturate(1.5); /* Deixa o monstro mais "avermelhado/escuro" */
+}
+
+@keyframes monster-body-splat {
+    0% { transform: scale(1); opacity: 1; filter: brightness(1); }
+    30% { transform: scale(1.1) translateY(-5px); filter: brightness(1.5) blur(1px); }
+    100% { transform: scale(0.8) translateY(20px); opacity: 0; filter: brightness(0); }
+}
